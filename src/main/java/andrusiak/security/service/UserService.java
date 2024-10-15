@@ -37,6 +37,9 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
     }
+    public User getById(Long id) {
+        return repository.findById(id).orElse(null);
+    }
 
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
@@ -52,6 +55,12 @@ public class UserService {
     public void getAdmin() {
         var user = getCurrentUser();
         user.setRole(Role.ROLE_ADMIN);
+        save(user);
+    }
+
+    public void activate(Long id) {
+        User user = getById(id);
+        user.setEnabled(true);
         save(user);
     }
 }

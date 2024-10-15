@@ -1,5 +1,6 @@
 package andrusiak.security.service;
 
+import andrusiak.security.domain.dto.EmailDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,9 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
+    private final ActivationService activationService;
+
 
     public JwtAuthenticationResponse signUp(SignUpRequest request) {
 
@@ -26,10 +30,14 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
+                .isEnabled(false)
                 .build();
 
-        userService.create(user);
-
+        user = userService.create(user);
+        String key = activationService.generateCode(user.getId());
+        emailService.sendEmail(new EmailDto(user.getEmail(), "Account activation",
+                "To activate your account, please, follow this link:\n" +
+                        "https://localhost:8080/auth/activate/" + key));
         var jwt = jwtService.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
     }
