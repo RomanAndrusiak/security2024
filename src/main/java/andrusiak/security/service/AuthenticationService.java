@@ -30,14 +30,14 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
-                .isEnabled(false)
+                .isEnable(false)
                 .build();
 
         user = userService.create(user);
         String key = activationService.generateCode(user.getId());
         emailService.sendEmail(new EmailDto(user.getEmail(), "Account activation",
                 "To activate your account, please, follow this link:\n" +
-                        "https://localhost:8080/auth/activate/" + key));
+                        "http://localhost:8081/auth/activate/" + key));
         var jwt = jwtService.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
     }
