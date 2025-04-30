@@ -1,5 +1,6 @@
 package andrusiak.security.service;
 
+import andrusiak.security.domain.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,6 +9,10 @@ import org.springframework.stereotype.Service;
 import andrusiak.security.domain.model.Role;
 import andrusiak.security.domain.model.User;
 import andrusiak.security.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +43,10 @@ public class UserService {
 
     }
 
+    public User getById(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
     }
@@ -53,5 +62,18 @@ public class UserService {
         var user = getCurrentUser();
         user.setRole(Role.ROLE_ADMIN);
         save(user);
+    }
+
+    public void activate(Long id) {
+        User user = getById(id);
+        user.setEnable(true);
+        save(user);
+    }
+
+    public List<UserDto> getAllUsersDto() {
+        return repository.findAll()
+                .stream()
+                .map(UserDto::new)
+                .toList();
     }
 }
